@@ -1,6 +1,7 @@
 # Apigee to AWS Converter
 
 A Python tool that converts Apigee API proxies to AWS Lambda functions and Step Functions state machines.
+Note: This is just a starter project and is not fully functional. This should be used as a reference to build your own converter.
 
 ## Features
 
