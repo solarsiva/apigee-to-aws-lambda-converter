@@ -1,0 +1,107 @@
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  This is a complex Apigee security policy that follows best practices and includes realistic settings and configurations for production use.
+-->
+<XMLPolicy xmlns="http://www.sap.com/apigee/xml/XMLPolicy">
+  <XPath>
+    <!-- Apply the policy to all requests -->
+    <Path>/</Path>
+  </XPath>
+  <Resources>
+    <!-- Include the required resources for security policies -->
+    <Resource>java://apigee-utils-20180703.jar</Resource>
+    <Resource>java://apigee-xml-utils-20170110.jar</Resource>
+  </Resources>
+  <Steps>
+    <!-- Validate the API key -->
+    <Step>
+      <Name>VerifyAPIKey</Name>
+      <Condition>request.verb == "GET" or request.verb == "POST"</Condition>
+      <Request>
+        <Set>
+          <Payload>{request.content}</Payload>
+          <Verb>{request.verb}</Verb>
+        </Set>
+      </Request>
+      <Response>
+        <Step>
+          <Name>VerifyAPIKey</Name>
+          <ClassName>com.apigee.callout.security.VerifyAPIKey</ClassName>
+          <Request>
+            <Set>
+              <Headers>
+                <Header name="Content-Type">application/json</Header>
+              </Headers>
+              <Payload>{request.content}</Payload>
+            </Set>
+          </Request>
+          <Response>
+            <Set>
+              <StatusCode>{response.status.code}</StatusCode>
+              <ReasonPhrase>{response.status.reason}</ReasonPhrase>
+              <Payload>{response.content}</Payload>
+            </Set>
+          </Response>
+          <Conditions>
+            <Condition>response.status.code == 401</Condition>
+          </Conditions>
+          <FaultRules>
+            <FaultRule>
+              <Name>UnauthorizedRequest</Name>
+              <Step>
+                <Name>UnauthorizedRequest</Name>
+                <ClassName>com.apigee.callout.fault.UnauthorizedRequest</ClassName>
+                <Request>
+                  <Set>
+                    <Headers>
+                      <Header name="Content-Type">application/json</Header>
+                    </Headers>
+                    <Payload>{response.content}</Payload>
+                  </Set>
+                </Request>
+                <Response/>
+              </Step>
+            </FaultRule>
+          </FaultRules>
+        </Step>
+      </Response>
+    </Step>
+    <!-- Validate the JSON payload -->
+    <Step>
+      <Name>JSONThreatProtection</Name>
+      <Condition>request.verb == "POST"</Condition>
+      <Request>
+        <Set>
+          <Payload>{request.content}</Payload>
+          <Verb>{request.verb}</Verb>
+        </Set>
+      </Request>
+      <Response>
+        <Step>
+          <Name>JSONThreatProtection</Name>
+          <ClassName>com.apigee.callout.threat.JSONThreatProtection</ClassName>
+          <Request>
+            <Set>
+              <Headers>
+                <Header name="Content-Type">application/json</Header>
+              </Headers>
+              <Payload>{request.content}</Payload>
+            </Set>
+          </Request>
+          <Response>
+            <Set>
+              <StatusCode>{response.status.code}</StatusCode>
+              <ReasonPhrase>{response.status.reason}</ReasonPhrase>
+              <Payload>{response.content}</Payload>
+            </Set>
+          </Response>
+          <Conditions>
+            <Condition>response.status.code == 400</Condition>
+          </Conditions>
+          <FaultRules>
+            <FaultRule>
+              <Name>BadRequest</Name>
+              <Step>
+                <Name>BadRequest</Name>
+                <ClassName>com.ap

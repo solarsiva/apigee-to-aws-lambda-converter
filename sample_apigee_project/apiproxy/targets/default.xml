@@ -1,0 +1,103 @@
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+This is a complex Apigee target-endpoint policy that includes various configurations and settings that may be used in a production environment. It follows Apigee best practices and includes detailed comments explaining each section.
+-->
+<TargetEndpoint name="ComplexTargetEndpoint">
+    <!-- Load Balancing Configuration -->
+    <LoadBalancer>
+        <!-- Use round-robin load balancing strategy -->
+        <Strategy>RoundRobin</Strategy>
+        <!-- Define the target servers -->
+        <Server name="server1">
+            <!-- Set the base URL for the target server -->
+            <BaseURL>https://api.example.com/v1</BaseURL>
+            <!-- Enable SSL client authentication -->
+            <SSLInfo>
+                <Enabled>true</Enabled>
+                <!-- Specify the client certificate and key files -->
+                <ClientAuthCredentials>
+                    <ClientCert>/opt/apigee/cert/client.crt</ClientCert>
+                    <ClientKey>/opt/apigee/cert/client.key</ClientKey>
+                </ClientAuthCredentials>
+            </SSLInfo>
+        </Server>
+        <Server name="server2">
+            <BaseURL>https://api.backup.com/v1</BaseURL>
+        </Server>
+    </LoadBalancer>
+
+    <!-- HTTP Transport Configuration -->
+    <HTTPTransportSecurity>
+        <!-- Disable HTTP/1.0 protocol -->
+        <HTTP1.0>disabled</HTTP1.0>
+        <!-- Enable HTTP/2 protocol -->
+        <HTTP2>enabled</HTTP2>
+    </HTTPTransportSecurity>
+
+    <!-- Retry Configuration -->
+    <Retry>
+        <!-- Set the maximum number of retries -->
+        <MaxRetryAttempts>3</MaxRetryAttempts>
+        <!-- Set the retry interval in milliseconds -->
+        <RetryInterval>5000</RetryInterval>
+        <!-- Define the retry conditions -->
+        <RetryConditions>
+            <!-- Retry on timeout errors -->
+            <ConditionOnHTTPCodes>
+                <HTTPStatusCode>504</HTTPStatusCode>
+            </ConditionOnHTTPCodes>
+            <!-- Retry on specific error codes -->
+            <ConditionOnErrorCodes>
+                <ErrorCode>1234</ErrorCode>
+                <ErrorCode>5678</ErrorCode>
+            </ConditionOnErrorCodes>
+        </RetryConditions>
+    </Retry>
+
+    <!-- Request/Response Handling -->
+    <Flows>
+        <!-- Define the request flow -->
+        <Flow name="request">
+            <!-- Add a request header -->
+            <Request>
+                <Headers>
+                    <Header name="X-Request-ID">{request.header.x-request-id}</Header>
+                </Headers>
+            </Request>
+        </Flow>
+        <!-- Define the response flow -->
+        <Flow name="response">
+            <!-- Remove a response header -->
+            <Response>
+                <Headers>
+                    <Header name="X-Backend-Server" status="remove"/>
+                </Headers>
+            </Response>
+        </Flow>
+    </Flows>
+
+    <!-- Fault Handling -->
+    <FaultRules>
+        <!-- Define a fault rule for 5xx errors -->
+        <FaultRule name="5xxErrors">
+            <Step>
+                <!-- Log the error message -->
+                <Name>LogError</Name>
+                <Condition>(fault.status.code >= 500) and (fault.status.code &lt; 600)</Condition>
+            </Step>
+            <!-- Return a custom error response -->
+            <AlwaysEnforceDefaultFaultResponse>
+                <StatusCode>500</StatusCode>
+                <ResponseBody>An internal server error occurred. Please try again later.</ResponseBody>
+            </AlwaysEnforceDefaultFaultResponse>
+        </FaultRule>
+    </FaultRules>
+
+    <!-- Default Fault Handling -->
+    <DefaultFaultRule>
+        <!-- Log the error message -->
+        <Step>
+            <Name>LogError</Name>
+        </Step>
+        <!-- Return a generic

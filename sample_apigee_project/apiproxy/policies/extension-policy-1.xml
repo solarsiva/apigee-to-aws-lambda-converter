@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  This is a complex Apigee extension policy that includes various configurations and settings that
+could be used in a production environment.
+  It follows Apigee best practices and includes detailed comments to explain the purpose and usage of
+each element.
+-->
+<ExtensionBundle name="complex-extension-policy">
+  <ExtensionPolicy>
+    <!-- This policy is responsible for handling authentication and authorization -->
+    <AuthenticationPolicy name="AuthenticationPolicy">
+      <DisplayName>Authentication Policy</DisplayName>
+      <Description>Handles authentication and authorization for incoming requests.</Description>
+      <Properties />
+      <CredentialReferenceEntries>
+        <!-- Reference to an Apigee key-value map containing OAuth credentials -->
+        <CredentialReferenceEntry name="oauth-credentials" source="request"
+          selector="request.queryparam.oauth_token" />
+      </CredentialReferenceEntries>
+      <AuthenticationFlow>
+        <!-- Validate the OAuth token against an external OAuth provider -->
+        <OAuthV2Verification>
+          <OperationResources>
+            <OperationResource operationName="GET" path="/resource">
+              <Methods>
+                <!-- Specify the allowed HTTP methods for this resource -->
+                <Method>GET</Method>
+              </Methods>
+            </OperationResource>
+          </OperationResources>
+          <CredentialRef>oauth-credentials</CredentialRef>
+          <AuthorizationUrl>https://example.com/oauth/authorize</AuthorizationUrl>
+          <TokenUrl>https://example.com/oauth/token</TokenUrl>
+          <ClientId>YOUR_CLIENT_ID</ClientId>
+          <ClientSecret>YOUR_CLIENT_SECRET</ClientSecret>
+          <Scopes>
+            <!-- Define the required scopes for this resource -->
+            <Scope>read</Scope>
+          </Scopes>
+        </OAuthV2Verification>
+      </AuthenticationFlow>
+    </AuthenticationPolicy>
+
+    <!-- This policy handles rate limiting for incoming requests -->
+    <RateLimitingPolicy name="RateLimitingPolicy">
+      <DisplayName>Rate Limiting Policy</DisplayName>
+      <Description>Limits the number of requests per client.</Description>
+      <Properties />
+      <RateLimitingFlow>
+        <!-- Configure rate limiting based on client IP address -->
+        <IPAddressRateLimiting>
+          <DistributedRateLimiting>
+            <!-- Use a distributed rate limiting strategy -->
+            <Enabled>true</Enabled>
+            <SyncWindow>
+              <!-- Set the sync window to 1 minute -->
+              <TimeUnit>minute</TimeUnit>
+              <Value>1</Value>
+            </SyncWindow>
+          </DistributedRateLimiting>
+          <Rate>
+            <!-- Allow 100 requests per minute per client IP -->
+            <TimeUnit>minute</TimeUnit>
+            <Value>100</Value>
+          </Rate>
+          <IdentifierRef>request.remoteaddr</IdentifierRef>
+        </IPAddressRateLimiting>
+      </RateLimitingFlow>
+    </RateLimitingPolicy>
+
+    <!-- This policy handles caching of responses -->
+    <CachingPolicy name="CachingPolicy">
+      <DisplayName>Caching Policy</DisplayName>
+      <Description>Caches responses to improve performance.</Description>
+      <Properties />
+      <CacheResources>
+        <!-- Define the resources to be cached -->
+        <CacheResource>
+          <Methods>
+            <!-- Cache GET requests -->
+            <Method>GET</Method>
+          </Methods>
+          <Path>/resource</Path>
+        </CacheResource>
+      </CacheResources>
+      <CacheEntrySettings>
+        <!-- Configure cache entry settings -->
+        <TimeoutInSec>300</TimeoutInSec>
+        <MaxEntries>1000</MaxEntries>
+      </CacheEntrySettings>
+    </CachingPolicy>
+
+    <!-- This policy handles logging of requests and responses -->
+    <LoggingPolicy name="LoggingPolicy">
+      <DisplayName>Logging Policy</DisplayName>
+      <Description>Logs request and response details for monitoring and debugging.</Description>
+      <Properties />
+      <LoggingFlow>
+        <!-- Configure request logging -->
+        <RequestLogging>
+          <Enabled>true</Enabled>
+          <LogLevel>INFO</LogLevel>
+          <Variables>
+            <!-- Log specific request variables -->
+            <Variable>request.header.user-agent</Variable>
+            <Variable>request.queryparam.all</Variable>
+            <Variable>request.content</Variable>
+          </Variables>
+        </RequestLogging>
+        <!-- Configure response logging -->
+        <ResponseLogging>
+          <Enabled>true</Enabled>
+          <LogLevel>INFO</LogLevel>
+          <Variables>
+            <!-- Log specific response variables -->
+            <Variable>response.status.code</Variable>
+            <Variable>response.header.content-type</Variable>
+            <Variable>response.content</Variable>
+          </Variables>
+        </ResponseLogging>
+      </LoggingFlow>
+    </LoggingPolicy>
+  </ExtensionPolicy>
+</ExtensionBundle>

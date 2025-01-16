@@ -25,9 +25,7 @@ wheels/
 .installed.cfg
 *.egg
 
-# Generated directories
-aws_output/
-sample_apigee_project/
+
 
 # IDE
 .idea/

@@ -1,0 +1,9 @@
+{
+  "name": "extension-policy-1",
+  "version": "1.0.0",
+  "description": "Converted from Apigee OAuth Policy",
+  "main": "index.js",
+  "dependencies": {
+    "apigee-base-layer": "file:../shared"
+  }
+}

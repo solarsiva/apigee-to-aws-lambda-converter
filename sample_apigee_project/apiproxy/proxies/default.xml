@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ProxyEndpoint name="default">
+    <PreFlow>
+        <Request>
+            <Step>
+                <Name>Flow-Hook-1</Name>
+                <Condition>(proxy.pathsuffix MatchesPath "/hook1/*") and (request.verb = "GET")</Condition>
+                <FlowHook />
+            </Step>
+        </Request>
+    </PreFlow>
+    <Flows>
+        <Flow name="Flow-1">
+            <Description>Flow for handling GET requests</Description>
+            <Condition>(proxy.pathsuffix MatchesPath "/get/*") and (request.verb = "GET")</Condition>
+            <Request>
+                <Step>
+                    <Name>Get-Request-Processing</Name>
+                    <Request>
+                        <!-- Processing logic for GET requests -->
+                    </Request>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>Get-Response-Processing</Name>
+                    <Response>
+                        <!-- Processing logic for GET responses -->
+                    </Response>
+                </Step>
+            </Response>
+        </Flow>
+        <Flow name="Flow-2">
+            <Description>Flow for handling POST requests</Description>
+            <Condition>(proxy.pathsuffix MatchesPath "/post/*") and (request.verb = "POST")</Condition>
+            <Request>
+                <Step>
+                    <Name>Post-Request-Processing</Name>
+                    <Request>
+                        <!-- Processing logic for POST requests -->
+                    </Request>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>Post-Response-Processing</Name>
+                    <Response>
+                        <!-- Processing logic for POST responses -->
+                    </Response>
+                </Step>
+            </Response>
+        </Flow>
+    </Flows>
+    <HTTPProxyConnection>
+        <BasePath>/api</BasePath>
+        <VirtualHost>default</VirtualHost>
+        <LoadBalancer>
+            <Server>
+                <WSBackEndURL>http://backend.example.com</WSBackEndURL>
+            </Server>
+        </LoadBalancer>
+    </HTTPProxyConnection>
+    <RouteRule name="Default">
+        <TargetEndpoint>default</TargetEndpoint>
+    </RouteRule>
+    <FaultRules>
+        <FaultRule name="Error-Handling">
+            <Step>
+                <Name>Error-Handling-Step</Name>
+                <Condition>fault.name != null</Condition>
+                <AlwaysEnforce>true</AlwaysEnforce>
+                <FaultRules>
+                    <Step>
+                        <Name>Log-Error</Name>
+                        <Condition>fault.name != null</Condition>
+                        <MessageLogging>
+                            <Message>Error occurred: {fault.name}</Message>
+                            <Category>error</Category>
+                        </MessageLogging>
+                    </Step>
+                    <Step>
+                        <Name>Return-Error-Response</Name>
+                        <Condition>fault.name != null</Condition>
+                        <Response>
+                            <StatusCode>500</StatusCode>
+                            <ReasonPhrase>Internal Server Error</ReasonPhrase>
+                            <PayloadBase64>
+                                <!-- Base64-encoded error response payload -->
+                            </PayloadBase64>
+                        </Response>
+                    </Step>
+                </FaultRules>
+            </Step>
+        </FaultRule>
+    </FaultRules>
+</ProxyEndpoint>

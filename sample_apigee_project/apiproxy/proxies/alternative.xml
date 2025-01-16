@@ -1,0 +1,107 @@
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ProxyEndpoint name="default">
+    <PreFlow>
+        <Request>
+            <Step>
+                <Name>Flow-Hook-Request-Start</Name>
+            </Step>
+            <Condition>(proxy.pathsuffix MatchesPath "/v1/products/*") and (request.verb = "GET")</Condition>
+            <Flow name="Products-GET">
+                <Request>
+                    <Step>
+                        <Name>Products-GET-Request</Name>
+                    </Step>
+                </Request>
+                <Response>
+                    <Step>
+                        <Name>Products-GET-Response</Name>
+                    </Step>
+                </Response>
+                <Condition>(products.response.status.code >= 400) and (products.response.status.code &lt; 500)</Condition>
+                <Flow name="Products-GET-Error-ClientError">
+                    <Description>Handle client errors for Products GET</Description>
+                    <Response>
+                        <Step>
+                            <Name>Products-GET-Error-ClientError-Response</Name>
+                        </Step>
+                    </Response>
+                </Flow>
+                <Condition>(products.response.status.code >= 500)</Condition>
+                <Flow name="Products-GET-Error-ServerError">
+                    <Description>Handle server errors for Products GET</Description>
+                    <Response>
+                        <Step>
+                            <Name>Products-GET-Error-ServerError-Response</Name>
+                        </Step>
+                    </Response>
+                </Flow>
+            </Flow>
+            <Condition>(proxy.pathsuffix MatchesPath "/v1/orders/*") and (request.verb = "POST")</Condition>
+            <Flow name="Orders-POST">
+                <Request>
+                    <Step>
+                        <Name>Orders-POST-Request</Name>
+                    </Step>
+                </Request>
+                <Response>
+                    <Step>
+                        <Name>Orders-POST-Response</Name>
+                    </Step>
+                </Response>
+                <Condition>(orders.response.status.code >= 400) and (orders.response.status.code &lt; 500)</Condition>
+                <Flow name="Orders-POST-Error-ClientError">
+                    <Description>Handle client errors for Orders POST</Description>
+                    <Response>
+                        <Step>
+                            <Name>Orders-POST-Error-ClientError-Response</Name>
+                        </Step>
+                    </Response>
+                </Flow>
+                <Condition>(orders.response.status.code >= 500)</Condition>
+                <Flow name="Orders-POST-Error-ServerError">
+                    <Description>Handle server errors for Orders POST</Description>
+                    <Response>
+                        <Step>
+                            <Name>Orders-POST-Error-ServerError-Response</Name>
+                        </Step>
+                    </Response>
+                </Flow>
+            </Flow>
+            <Step>
+                <Name>Flow-Hook-Request-End</Name>
+            </Step>
+        </Request>
+        <Response>
+            <Step>
+                <Name>Flow-Hook-Response-Start</Name>
+            </Step>
+        </Response>
+        <Response>
+            <Step>
+                <Name>Flow-Hook-Response-End</Name>
+            </Step>
+        </Response>
+    </PreFlow>
+    <HTTPProxyConnection>
+        <BasePath>/v1</BasePath>
+        <VirtualHost>default</VirtualHost>
+        <LoadBalancer>
+            <Server>
+                <Address>target_server_1</Address>
+            </Server>
+            <Server>
+                <Address>target_server_2</Address>
+            </Server>
+        </LoadBalancer>
+        <RouteRule name="Products">
+            <Condition>(proxy.pathsuffix MatchesPath "/products/*") and (request.verb = "GET")</Condition>
+            <TargetEndpoint>products</TargetEndpoint>
+        </RouteRule>
+        <RouteRule name="Orders">
+            <Condition>(proxy.pathsuffix MatchesPath "/orders/*") and (request.verb = "POST")</Condition>
+            <TargetEndpoint>orders</TargetEndpoint>
+        </RouteRule>
+    </HTTPProxyConnection>
+</ProxyEndpoint>
+```

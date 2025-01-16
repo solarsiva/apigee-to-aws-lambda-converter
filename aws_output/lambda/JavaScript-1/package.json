@@ -1,0 +1,9 @@
+{
+  "name": "JavaScript-1",
+  "version": "1.0.0",
+  "description": "Converted from Apigee JavaScript Policy",
+  "main": "index.js",
+  "dependencies": {
+    "apigee-base-layer": "file:../shared"
+  }
+}

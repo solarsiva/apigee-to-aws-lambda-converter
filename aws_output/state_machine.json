@@ -1,0 +1,157 @@
+{
+  "Comment": "Converted from Apigee",
+  "StartAt": "AssignMessage",
+  "States": {
+    "AssignMessage": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:AssignMessage",
+      "Next": "End",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "ServiceCallout-1": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:ServiceCallout-1",
+      "Next": "End",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "traffic-management-policy-2": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:traffic-management-policy-2",
+      "Next": "QuotaViolation",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "extension-policy-2": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:extension-policy-2",
+      "Next": "xsl://transform-template.xsl",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "JavaScript-1": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:JavaScript-1",
+      "Next": "End",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "traffic-management-policy-1": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:traffic-management-policy-1",
+      "Next": "End",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "extension-policy-1": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:extension-policy-1",
+      "Next": "End",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "mediation-policy-2": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:mediation-policy-2",
+      "Next": "client_id",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "mediation-policy-1": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:mediation-policy-1",
+      "Next": "OAuth-v2",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "security-policy-2": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:security-policy-2",
+      "Next": "VerifyAPIKey",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "security-policy-1": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:security-policy-1",
+      "Next": "End",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler"
+        }
+      ]
+    },
+    "ErrorHandler": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:error-handler",
+      "End": true
+    },
+    "End": {
+      "Type": "Succeed"
+    }
+  }
+}

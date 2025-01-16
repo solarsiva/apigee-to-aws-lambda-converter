@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout async="false" continueOnError="false" enabled="true" name="ServiceCallout-1">
+    <DisplayName>External API Call</DisplayName>
+    <Request>
+        <URL>https://api.example.com/data</URL>
+    </Request>
+    <Response>calloutResponse</Response>
+    <Timeout>30000</Timeout>
+</ServiceCallout>

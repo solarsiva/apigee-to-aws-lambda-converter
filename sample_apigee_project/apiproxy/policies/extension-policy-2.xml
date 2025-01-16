@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  This is a complex Apigee extension policy that focuses on data transformation, validation,
+  and integration capabilities. It complements extension-policy-1 by providing additional
+  functionality for API processing.
+-->
+<ExtensionBundle name="data-processing-extension">
+    <ExtensionPolicy>
+        <!-- Data Validation Policy -->
+        <ValidationPolicy name="DataValidationPolicy">
+            <DisplayName>Data Validation Policy</DisplayName>
+            <Description>Validates incoming request data against JSON Schema</Description>
+            <Properties />
+            <ValidationFlow>
+                <!-- JSON Schema Validation -->
+                <SchemaValidation>
+                    <Schema>
+                        {
+                        "type": "object",
+                        "required": ["userId", "data"],
+                        "properties": {
+                        "userId": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9]{8,}$"
+                        },
+                        "data": {
+                        "type": "object",
+                        "required": ["type", "content"],
+                        "properties": {
+                        "type": {
+                        "type": "string",
+                        "enum": ["text", "json", "xml"]
+                        },
+                        "content": {
+                        "type": "string"
+                        }
+                        }
+                        }
+                        }
+                        }
+                    </Schema>
+                    <ErrorHandling>
+                        <DefaultFault>
+                            <FaultResponse>
+                                <StatusCode>400</StatusCode>
+                                <ReasonPhrase>Invalid Request Data</ReasonPhrase>
+                                <FaultString>Request payload validation failed</FaultString>
+                            </FaultResponse>
+                        </DefaultFault>
+                    </ErrorHandling>
+                </SchemaValidation>
+            </ValidationFlow>
+        </ValidationPolicy>
+
+        <!-- Data Transformation Policy -->
+        <TransformationPolicy name="DataTransformationPolicy">
+            <DisplayName>Data Transformation Policy</DisplayName>
+            <Description>Transforms data between different formats</Description>
+            <Properties />
+            <TransformationFlow>
+                <!-- XSLT Transformation -->
+                <XSLTransformation>
+                    <ResourceURL>xsl://transform-template.xsl</ResourceURL>
+                    <Parameters>
+                        <Parameter name="format">json</Parameter>
+                        <Parameter name="version">2.0</Parameter>
+                    </Parameters>
+                    <OutputVariable>transformed.content</OutputVariable>
+                </XSLTransformation>
+                <!-- JSON Transform -->
+                <JSONTransformation>
+                    <Template>
+                        {
+                        "mappedData": {
+                        "id": "${request.body.data.id}",
+                        "type": "${request.body.data.type}",
+                        "processedContent": "${transformed.content}",
+                        "timestamp": "${system.timestamp}"
+                        }
+                        }
+                    </Template>
+                    <OutputVariable>final.output</OutputVariable>
+                </JSONTransformation>
+            </TransformationFlow>
+        </TransformationPolicy>
+
+        <!-- Integration Policy -->
+        <IntegrationPolicy name="ExternalIntegrationPolicy">
+            <DisplayName>External Integration Policy</DisplayName>
+            <Description>Handles integration with external services</Description>
+            <Properties />
+            <IntegrationFlow>
+                <!-- Circuit Breaker Configuration -->
+                <CircuitBreaker>
+                    <FailureThreshold>5</FailureThreshold>
+                    <ResetTimeout>60000</ResetTimeout>
+                    <ErrorCodes>
+                        <Code>500</Code>
+                        <Code>502</Code>
+                        <Code>503</Code>
+                    </ErrorCodes>
+                </CircuitBreaker>
+                <!-- Retry Configuration -->
+                <RetryConfiguration>
+                    <MaxRetries>3</MaxRetries>
+                    <RetryInterval>1000</RetryInterval>
+                    <BackoffMultiplier>2</BackoffMultiplier>
+                </RetryConfiguration>
+                <!-- Service Endpoints -->
+                <ServiceEndpoints>
+                    <Endpoint name="primary">
+                        <URL>https://api.primary-service.com/v1</URL>
+                        <Timeout>5000</Timeout>
+                        <Authentication>
+                            <Type>oauth2</Type>
+                            <ClientId>${properties.integration.client_id}</ClientId>
+                            <ClientSecret>${properties.integration.client_secret}</ClientSecret>
+                        </Authentication>
+                    </Endpoint>
+                    <Endpoint name="fallback">
+                        <URL>https://api.backup-service.com/v1</URL>
+                        <Timeout>3000</Timeout>
+                        <Authentication>
+                            <Type>apikey</Type>
+                            <KeyLocation>header</KeyLocation>
+                            <KeyName>X-API-Key</KeyName>
+                            <KeyValue>${properties.integration.api_key}</KeyValue>
+                        </Authentication>
+                    </Endpoint>
+                </ServiceEndpoints>
+            </IntegrationFlow>
+        </IntegrationPolicy>
+
+        <!-- Metrics and Analytics Policy -->
+        <MetricsPolicy name="MetricsCollectionPolicy">
+            <DisplayName>Metrics Collection Policy</DisplayName>
+            <Description>Collects and processes API metrics</Description>
+            <Properties />
+            <MetricsFlow>
+                <!-- Custom Metrics -->
+                <CustomMetrics>
+                    <Metric name="processing_time">
+                        <Value>#{system.timestamp - request.received.timestamp}</Value>
+                        <Type>timer</Type>
+                        <Tags>
+                            <Tag name="endpoint">{proxy.pathsuffix}</Tag>
+                            <Tag name="method">{request.verb}</Tag>
+                        </Tags>
+                    </Metric>
+                    <Metric name="payload_size">
+                        <Value>#{request.header.content-length}</Value>
+                        <Type>gauge</Type>
+                    </Metric>
+                </CustomMetrics>
+                <!-- Analytics Configuration -->
+                <Analytics>
+                    <Enabled>true</Enabled>
+                    <SamplingRate>100</SamplingRate>
+                    <DataCapture>
+                        <Request>
+                            <Headers>true</Headers>
+                            <QueryParams>true</QueryParams>
+                            <Payload>false</Payload>
+                        </Request>
+                        <Response>
+                            <Headers>true</Headers>
+                            <Payload>false</Payload>
+                        </Response>
+                    </DataCapture>
+                </Analytics>
+            </MetricsFlow>
+        </MetricsPolicy>
+    </ExtensionPolicy>
+</ExtensionBundle>

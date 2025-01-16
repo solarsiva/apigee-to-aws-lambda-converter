@@ -1,0 +1,103 @@
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- This is a complex Apigee mediation policy that includes various configurations and settings.
+     It follows Apigee best practices and includes detailed comments explaining each step. -->
+<APIProxy name="ComplexMediation" revision="1">
+    <Description>Complex Apigee mediation policy</Description>
+
+    <!-- Define the proxy endpoint and routing rules -->
+    <ProxyEndpoints>
+        <ProxyEndpoint name="default">
+            <HTTPProxyConnection>
+                <!-- Configure the backend target endpoint -->
+                <URL>https://api.example.com</URL>
+            </HTTPProxyConnection>
+            <RouteRule name="default">
+                <TargetEndpoint>default</TargetEndpoint>
+            </RouteRule>
+        </ProxyEndpoint>
+    </ProxyEndpoints>
+
+    <!-- Define the request and response flow policies -->
+    <Flows>
+        <Flow name="ProtectAPIWithOAuth">
+            <!-- Verify the OAuth token and extract claims -->
+            <Request>
+                <Step>
+                    <Name>OAuth-v2</Name>
+                    <AssignVariable>
+                        <Name>oauth.decoded_token</Name>
+                        <Ref>decoded-jwt</Ref>
+                    </AssignVariable>
+                </Step>
+                <!-- Check if the token is valid and has the required scopes -->
+                <Step>
+                    <Name>OAuth-v2-Verify</Name>
+                    <ConditionExpr>{oauth.decoded_token.scope} =~ /^(read|write)$/</ConditionExpr>
+                </Step>
+            </Request>
+            <Response/>
+        </Flow>
+
+        <Flow name="LogRequestAndResponse">
+            <!-- Log the request payload and headers -->
+            <Request>
+                <Step>
+                    <Name>LogRequestPayload</Name>
+                    <Condition>request.verb == "POST" || request.verb == "PUT"</Condition>
+                </Step>
+                <Step>
+                    <Name>LogRequestHeaders</Name>
+                </Step>
+            </Request>
+            <!-- Log the response payload and headers -->
+            <Response>
+                <Step>
+                    <Name>LogResponsePayload</Name>
+                    <Condition>response.status.code >= 400</Condition>
+                </Step>
+                <Step>
+                    <Name>LogResponseHeaders</Name>
+                </Step>
+            </Response>
+        </Flow>
+
+        <Flow name="TransformRequest">
+            <!-- Transform the request payload using an XSLT stylesheet -->
+            <Request>
+                <Step>
+                    <Name>XMLToJSON</Name>
+                    <Condition>request.header.Content-Type == "application/xml"</Condition>
+                </Step>
+                <Step>
+                    <Name>TransformRequestPayload</Name>
+                    <Condition>request.verb == "POST" || request.verb == "PUT"</Condition>
+                    <Request>TransformRequestPayload.xslt</Request>
+                </Step>
+            </Request>
+            <Response/>
+        </Flow>
+
+        <Flow name="TransformResponse">
+            <!-- Transform the response payload using a JavaScript policy -->
+            <Response>
+                <Step>
+                    <Name>TransformResponsePayload</Name>
+                    <Request>TransformResponsePayload.js</Request>
+                </Step>
+            </Response>
+        </Flow>
+
+        <Flow name="RateLimitAPI">
+            <!-- Apply rate limiting to the API -->
+            <Request>
+                <Step>
+                    <Name>SpikeArrest</Name>
+                    <Condition>request.queryparam.apikey != null</Condition>
+                    <SpikeArrestPolicy>
+                        <Rate>10pm</Rate>
+                        <UseEffectiveCount>true</UseEffectiveCount>
+                        <IdentifierRef>request.queryparam.apikey</IdentifierRef>
+                    </SpikeArrestPolicy>
+                </Step>
+            </Request>

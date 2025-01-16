@@ -1,0 +1,99 @@
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+    This is a complex Apigee security policy that follows best practices for securing APIs in production environments.
+    It includes various security measures such as OAuth 2.0 protection, IP address filtering, rate limiting, threat protection, and more.
+-->
+<policies xmlns="http://apigee.com/VerifyAPIKey">
+    <policy name="Verify API Key" revision="1">
+        <!--
+            This policy verifies the API key passed in the request header or query parameter.
+            It ensures that only authorized clients with valid API keys can access the API.
+        -->
+        <verify-api-key>
+            <header-name>X-API-Key</header-name>
+            <query-param-name>api_key</query-param-name>
+        </verify-api-key>
+    </policy>
+
+    <policy name="OAuth 2.0" revision="1">
+        <!--
+            This policy enforces OAuth 2.0 protection for the API.
+            It validates the access token and ensures that the client has the necessary scopes and permissions.
+        -->
+        <oauth2>
+            <verify-api-key>
+                <header-name>Authorization</header-name>
+                <query-param-name>access_token</query-param-name>
+            </verify-api-key>
+            <scope-ref>
+                <name>read</name>
+                <name>write</name>
+            </scope-ref>
+        </oauth2>
+    </policy>
+
+    <policy name="IP Address Filtering" revision="1">
+        <!--
+            This policy filters incoming requests based on the client's IP address.
+            It allows or denies access based on a whitelist or blacklist of IP addresses or ranges.
+        -->
+        <ip-access>
+            <allowed-ip>192.168.1.0/24</allowed-ip>
+            <allowed-ip>10.0.0.0/8</allowed-ip>
+            <denied-ip>1.2.3.4</denied-ip>
+        </ip-access>
+    </policy>
+
+    <policy name="Rate Limiting" revision="1">
+        <!--
+            This policy limits the rate of incoming requests to protect against abuse and denial of service attacks.
+            It can be configured with different rate limits based on the client, API, or resource.
+        -->
+        <quota>
+            <allow>10</allow>
+            <interval>60</interval>
+            <time-unit>second</time-unit>
+            <identifier>
+                <header-name>X-Client-ID</header-name>
+            </identifier>
+        </quota>
+    </policy>
+
+    <policy name="Threat Protection" revision="1">
+        <!--
+            This policy provides protection against various threats such as SQL injection, cross-site scripting (XSS), and other malicious attacks.
+            It inspects and sanitizes incoming requests to prevent exploits.
+        -->
+        <threat-protection>
+            <sql-injection>
+                <enabled>true</enabled>
+            </sql-injection>
+            <xss>
+                <enabled>true</enabled>
+            </xss>
+            <malicious-ip>
+                <enabled>true</enabled>
+                <action>deny</action>
+            </malicious-ip>
+        </threat-protection>
+    </policy>
+
+    <policy name="Content Validation" revision="1">
+        <!--
+            This policy validates the content of incoming requests to ensure they conform to expected formats and schemas.
+            It can validate XML, JSON, or other data formats based on predefined schemas or rules.
+        -->
+        <content-validation>
+            <schema-file>schema.xsd</schema-file>
+            <validation-errors>
+                <enabled>true</enabled>
+                <action>reject</action>
+            </validation-errors>
+        </content-validation>
+    </policy>
+
+    <policy name="CORS" revision="1">
+        <!--
+            This policy enables Cross-Origin Resource Sharing (CORS) for the API, allowing it to be accessed from different domains.
+            It can be configured with allowed origins, methods, headers, and other

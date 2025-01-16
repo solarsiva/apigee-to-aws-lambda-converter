@@ -1,0 +1,95 @@
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+This is a complex Apigee traffic-management policy designed for production use.
+It follows Apigee best practices and includes detailed comments.
+-->
+<VerifyAPIKey name="VerifyAPIKey">
+    <!-- Verify the API key against the API products defined in the organization -->
+    <VerificationSource>request.queryparam.apikey</VerificationSource>
+</VerifyAPIKey>
+
+<Quota name="QuotaLimit" type="calendar">
+    <!-- Apply a quota limit to prevent abuse and manage resource consumption -->
+    <Interval>1</Interval>
+    <TimeUnit>hour</TimeUnit>
+    <Allow>1000</Allow>
+    <Identifier ref="request.header.client-id"/>
+    <Distributed>true</Distributed>
+    <Synchronous>true</Synchronous>
+    <Async>true</Async>
+    <AsynchronousConfiguration>
+        <FaultRules>
+            <!-- Define fault rules for handling asynchronous quota failures -->
+            <FaultRule>
+                <Name>QuotaViolation</Name>
+                <Condition>(fault.name Matches "QuotaViolation")</Condition>
+                <Action>
+                    <Name>RaiseFault</Name>
+                    <Arguments>
+                        <Argument name="name">QuotaViolation</Argument>
+                        <Argument name="failureCode">429</Argument>
+                        <Argument name="errorMessage">Quota limit exceeded</Argument>
+                    </Arguments>
+                </Action>
+            </FaultRule>
+        </FaultRules>
+    </AsynchronousConfiguration>
+</Quota>
+
+<SpikeArrest name="SpikeArrest">
+    <!-- Protect against traffic spikes and DoS attacks -->
+    <Rate>10pm</Rate>
+    <UseEffectiveCount>true</UseEffectiveCount>
+    <IdentifierRef>request.header.client-id</IdentifierRef>
+</SpikeArrest>
+
+<ServiceCallout name="ServiceCallout" target="https://example.com/service">
+    <!-- Call an external service for additional processing or data enrichment -->
+    <Request>
+        <Set>
+            <Headers>
+                <Header name="Content-Type">application/json</Header>
+            </Headers>
+        </Set>
+        <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+    </Request>
+    <Response>SuccessXML</Response>
+    <FaultRules>
+        <!-- Define fault rules for handling service callout failures -->
+        <FaultRule>
+            <Name>ServiceCalloutFailed</Name>
+            <Condition>(fault.name Matches "ServiceCalloutFailed")</Condition>
+            <Action>
+                <Name>RaiseFault</Name>
+                <Arguments>
+                    <Argument name="name">ServiceCalloutFailed</Argument>
+                    <Argument name="failureCode">500</Argument>
+                    <Argument name="errorMessage">Service callout failed</Argument>
+                </Arguments>
+            </Action>
+        </FaultRule>
+    </FaultRules>
+</ServiceCallout>
+
+<XMLToJSON name="XMLToJSON">
+    <!-- Convert the response from the service callout to JSON -->
+    <Source>response</Source>
+    <OutputVariable>response.json</OutputVariable>
+</XMLToJSON>
+
+<AssignMessage name="AssignMessage">
+    <!-- Construct the final response to be returned to the client -->
+    <AssignTo createNew="true">
+        <Name>response.content</Name>
+        <Value>{response.json}</Value>
+    </AssignTo>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>
+
+<RaiseFault name="RaiseFault">
+    <!-- Raise a fault if any errors occur during policy execution -->
+    <FaultResponse>
+        <Set>
+            <Headers>
+                <Header

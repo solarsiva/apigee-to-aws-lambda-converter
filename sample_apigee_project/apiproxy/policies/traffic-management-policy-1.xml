@@ -1,0 +1,72 @@
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+    This is a complex Apigee traffic-management policy XML that includes realistic settings and configurations
+    that would be used in a production environment. The policy follows Apigee best practices and includes detailed
+    comments to explain each section.
+-->
+<policies>
+    <!-- Quota Policy to limit the number of requests per API key -->
+    <Quota async="true" continueOnError="false" enabled="true" name="Quota">
+        <DisplayName>Quota</DisplayName>
+        <Properties/>
+        <Allow countRef="apiproduct.developer.quota.count" count="1000" countName="RequestCount" timeUnit="hour">
+            <Identifier ref="request.queryparam.apikey" />
+        </Allow>
+        <Interval ref="request.header.Client-ID">hourly</Interval>
+        <TimeUnit>hour</TimeUnit>
+        <Distributed>true</Distributed>
+        <Synchronous>false</Synchronous>
+        <StartTime>2023-04-01 00:00:00</StartTime>
+        <UniformWindowSize>true</UniformWindowSize>
+        <AsynchronousConfiguration>
+            <FromSendStreamName>quota-request-stream</FromSendStreamName>
+            <UnboundedQueueSize>true</UnboundedQueueSize>
+        </AsynchronousConfiguration>
+    </Quota>
+
+    <!-- Spike Arrest Policy to protect against traffic spikes -->
+    <SpikeArrest async="true" continueOnError="false" enabled="true" name="Spike-Arrest">
+        <DisplayName>Spike Arrest</DisplayName>
+        <Properties/>
+        <Rate>10pm</Rate>
+        <UseEffectiveCount>true</UseEffectiveCount>
+        <Identifier ref="request.header.Client-ID" />
+        <MessageWeight>1</MessageWeight>
+        <AsynchronousConfiguration>
+            <FromSendStreamName>spike-arrest-request-stream</FromSendStreamName>
+            <UnboundedQueueSize>true</UnboundedQueueSize>
+        </AsynchronousConfiguration>
+    </SpikeArrest>
+
+    <!-- JSON Threat Protection Policy to defend against JSON-based attacks -->
+    <JSONThreatProtection async="true" continueOnError="false" enabled="true" name="JSON-Threat-Protection">
+        <DisplayName>JSON Threat Protection</DisplayName>
+        <Properties/>
+        <Source>request</Source>
+        <JSONThreatProtectionPolicy>
+            <MaxObjectDepth>10</MaxObjectDepth>
+            <MaxArraySize>100</MaxArraySize>
+            <MaxStringSize>1024</MaxStringSize>
+            <MaxObjectSize>4096</MaxObjectSize>
+            <IgnoreRemoteSchemaConflict>false</IgnoreRemoteSchemaConflict>
+            <IgnoreRemoteSchemaResolutionErrors>false</IgnoreRemoteSchemaResolutionErrors>
+        </JSONThreatProtectionPolicy>
+        <OutputVariable>json_threat_protection_output</OutputVariable>
+        <AsynchronousConfiguration>
+            <FromSendStreamName>json-threat-protection-request-stream</FromSendStreamName>
+            <UnboundedQueueSize>true</UnboundedQueueSize>
+        </AsynchronousConfiguration>
+    </JSONThreatProtection>
+
+    <!-- XML Threat Protection Policy to defend against XML-based attacks -->
+    <XMLThreatProtection async="true" continueOnError="false" enabled="true" name="XML-Threat-Protection">
+        <DisplayName>XML Threat Protection</DisplayName>
+        <Properties/>
+        <Source>request</Source>
+        <XMLThreatProtectionPolicy>
+            <MaxAttributeCount>100</MaxAttributeCount>
+            <MaxAttributeValueLength>1024</MaxAttributeValueLength>
+            <MaxChildrenCount>1000</MaxChildrenCount>
+            <MaxElementDepth>10</MaxElementDepth>
+            <MaxElementNameLength>

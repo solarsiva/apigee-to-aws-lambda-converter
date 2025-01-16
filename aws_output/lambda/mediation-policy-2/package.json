@@ -1,0 +1,9 @@
+{
+  "name": "mediation-policy-2",
+  "version": "1.0.0",
+  "description": "Converted from Apigee AssignMessage Policy",
+  "main": "index.js",
+  "dependencies": {
+    "apigee-base-layer": "file:../shared"
+  }
+}

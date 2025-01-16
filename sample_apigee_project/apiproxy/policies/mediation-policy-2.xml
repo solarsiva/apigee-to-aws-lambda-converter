@@ -1,0 +1,105 @@
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+This is a complex Apigee mediation policy that follows best practices for production use.
+It includes various policy types, such as JavaScript, Quota, Spike Arrest, and more.
+-->
+<APIProxy revision="1" name="ComplexProxy">
+    <Description>A complex Apigee proxy with various policies</Description>
+    <PreFlow name="PreFlow">
+        <!-- Verify API key and quota -->
+        <VerifyAPIKey name="VerifyAPIKey">
+            <APIKey ref="request.queryparam.apikey" />
+        </VerifyAPIKey>
+        <Quota name="QuotaPolicy" type="calendar">
+            <Identifier ref="request.header.client-id" />
+            <AllowedCounters>
+                <Counter>calls</Counter>
+            </AllowedCounters>
+            <Interval>1</Interval>
+            <TimeUnit>hour</TimeUnit>
+            <Limit>1000</Limit>
+            <CounterStrategy>FASTEST</CounterStrategy>
+            <Distributed>true</Distributed>
+            <Synchronous>true</Synchronous>
+        </Quota>
+
+        <!-- Spike Arrest to prevent API abuse -->
+        <SpikeArrest name="SpikeArrest">
+            <IdentifierRef>client_id</IdentifierRef>
+            <Rate>10pm</Rate>
+            <UseEffectiveCount>true</UseEffectiveCount>
+        </SpikeArrest>
+
+        <!-- JavaScript policy for data transformation -->
+        <Javascript name="JSTransformation">
+            <ResourceURL>jsc://transform.js</ResourceURL>
+            <IncludeURL>jsc://helpers.js</IncludeURL>
+        </Javascript>
+
+        <!-- XML-to-JSON policy -->
+        <XMLToJSON name="XMLToJSON" />
+
+        <!-- Assign message properties -->
+        <AssignMessage name="AssignMessageProperties">
+            <AssignVariable>
+                <Name>client_id</Name>
+                <Ref>request.header.client-id</Ref>
+            </AssignVariable>
+            <AssignVariable>
+                <Name>request.verb</Name>
+                <Ref>request.verb</Ref>
+            </AssignVariable>
+        </AssignMessage>
+    </PreFlow>
+
+    <Flows>
+        <Flow name="GetProductsFlow">
+            <Description>Flow for GET /products endpoint</Description>
+            <Condition>(proxy.pathsuffix MatchesPath "/products") and (request.verb = "GET")</Condition>
+            <Request>
+                <Step>
+                    <Name>GetProductsRequest</Name>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>GetProductsResponse</Name>
+                </Step>
+            </Response>
+        </Flow>
+    </Flows>
+
+    <PostFlow name="PostFlow">
+        <!-- Log response payload -->
+        <LogResponse name="LogResponse">
+            <Enabled>true</Enabled>
+        </LogResponse>
+
+        <!-- JSON-to-XML policy -->
+        <JSONToXML name="JSONToXML" />
+
+        <!-- Assign response headers -->
+        <AssignMessage name="AssignResponseHeaders">
+            <AssignVariable>
+                <Name>response.header.Content-Type</Name>
+                <Value>application/xml</Value>
+            </AssignVariable>
+        </AssignMessage>
+    </PostFlow>
+
+    <HTTPProxyConnection>
+        <!-- Load balancing across multiple backend instances -->
+        <LoadBalancer>
+            <Server name="backend1" cluster="production">
+                <HTTPTargetConnection>
+                    <URL>https://backend1.example.com</URL>
+                </HTTPTargetConnection>
+            </Server>
+            <Server name="backend2" cluster="production">
+                <HTTPTargetConnection>
+                    <URL>https://backend2.example.com</URL>
+                </HTTPTargetConnection>
+            </Server>
+        </LoadBalancer>
+    </
