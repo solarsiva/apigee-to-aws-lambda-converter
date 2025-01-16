@@ -1,0 +1,18 @@
+aws:
+  profile_name: [PROFILE_NAME]
+  region: us-east-1
+
+bedrock:
+  model_id: anthropic.claude-3-sonnet-20240229-v1:0
+  temperature: 0.7
+  policy_max_tokens: 1000
+  flow_max_tokens: 1500
+  conversion:
+    base_prompt_template: "templates/base_conversion.txt"
+    implementation_prompt_template: "templates/implementation.txt"
+    max_context_tokens: 2000
+    retry_attempts: 3
+
+paths:
+  source_dir: "sample_apigee_project"
+  output_dir: "aws_output" 
