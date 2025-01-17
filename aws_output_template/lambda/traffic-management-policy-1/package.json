@@ -1,0 +1,10 @@
+{
+  "name": "traffic-management-handler",
+  "version": "1.0.0",
+  "description": "Converted from Apigee Traffic Management Policy",
+  "main": "index.js",
+  "dependencies": {
+    "apigee-base-layer": "file:../shared",
+    "ioredis": "^5.0.0"
+  }
+}

@@ -1,7 +1,7 @@
-```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-  This is a complex Apigee security policy that follows best practices and includes realistic settings and configurations for production use.
+  This is a complex Apigee security policy that follows best practices and includes realistic
+settings and configurations for production use.
 -->
 <XMLPolicy xmlns="http://www.sap.com/apigee/xml/XMLPolicy">
   <XPath>
@@ -60,7 +60,7 @@
                     <Payload>{response.content}</Payload>
                   </Set>
                 </Request>
-                <Response/>
+                <Response />
               </Step>
             </FaultRule>
           </FaultRules>
@@ -104,4 +104,21 @@
               <Name>BadRequest</Name>
               <Step>
                 <Name>BadRequest</Name>
-                <ClassName>com.ap
+                <ClassName>com.apigee.callout.fault.BadRequest</ClassName>
+                <Request>
+                  <Set>
+                    <Headers>
+                      <Header name="Content-Type">application/json</Header>
+                    </Headers>
+                    <Payload>{response.content}</Payload>
+                  </Set>
+                </Request>
+                <Response />
+              </Step>
+            </FaultRule>
+          </FaultRules>
+        </Step>
+      </Response>
+    </Step>
+  </Steps>
+</XMLPolicy>

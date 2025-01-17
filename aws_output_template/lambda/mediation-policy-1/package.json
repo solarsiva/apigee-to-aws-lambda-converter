@@ -1,0 +1,9 @@
+{
+  "name": "mediation-handler",
+  "version": "1.0.0",
+  "description": "Converted from Apigee Mediation Policy",
+  "main": "index.js",
+  "dependencies": {
+    "apigee-base-layer": "file:../shared"
+  }
+}

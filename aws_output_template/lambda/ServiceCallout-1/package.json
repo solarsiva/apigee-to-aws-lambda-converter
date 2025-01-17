@@ -1,0 +1,10 @@
+{
+  "name": "service-callout-handler",
+  "version": "1.0.0",
+  "description": "Converted from Apigee ServiceCallout Policy",
+  "main": "index.js",
+  "dependencies": {
+    "apigee-base-layer": "file:../shared",
+    "axios": "^0.24.0"
+  }
+}

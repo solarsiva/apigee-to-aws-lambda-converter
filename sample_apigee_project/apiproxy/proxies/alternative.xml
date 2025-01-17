@@ -1,4 +1,3 @@
-```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ProxyEndpoint name="default">
     <PreFlow>
@@ -18,7 +17,8 @@
                         <Name>Products-GET-Response</Name>
                     </Step>
                 </Response>
-                <Condition>(products.response.status.code >= 400) and (products.response.status.code &lt; 500)</Condition>
+                <Condition>(products.response.status.code >= 400) and (products.response.status.code
+                    &lt; 500)</Condition>
                 <Flow name="Products-GET-Error-ClientError">
                     <Description>Handle client errors for Products GET</Description>
                     <Response>
@@ -49,7 +49,8 @@
                         <Name>Orders-POST-Response</Name>
                     </Step>
                 </Response>
-                <Condition>(orders.response.status.code >= 400) and (orders.response.status.code &lt; 500)</Condition>
+                <Condition>(orders.response.status.code >= 400) and (orders.response.status.code
+                    &lt; 500)</Condition>
                 <Flow name="Orders-POST-Error-ClientError">
                     <Description>Handle client errors for Orders POST</Description>
                     <Response>
@@ -104,4 +105,3 @@
         </RouteRule>
     </HTTPProxyConnection>
 </ProxyEndpoint>
-```

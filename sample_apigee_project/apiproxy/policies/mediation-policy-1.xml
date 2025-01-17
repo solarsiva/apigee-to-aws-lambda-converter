@@ -1,22 +1,8 @@
-```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!-- This is a complex Apigee mediation policy that includes various configurations and settings.
      It follows Apigee best practices and includes detailed comments explaining each step. -->
-<APIProxy name="ComplexMediation" revision="1">
+<MediationPolicy name="ComplexMediation">
     <Description>Complex Apigee mediation policy</Description>
-
-    <!-- Define the proxy endpoint and routing rules -->
-    <ProxyEndpoints>
-        <ProxyEndpoint name="default">
-            <HTTPProxyConnection>
-                <!-- Configure the backend target endpoint -->
-                <URL>https://api.example.com</URL>
-            </HTTPProxyConnection>
-            <RouteRule name="default">
-                <TargetEndpoint>default</TargetEndpoint>
-            </RouteRule>
-        </ProxyEndpoint>
-    </ProxyEndpoints>
 
     <!-- Define the request and response flow policies -->
     <Flows>
@@ -36,7 +22,7 @@
                     <ConditionExpr>{oauth.decoded_token.scope} =~ /^(read|write)$/</ConditionExpr>
                 </Step>
             </Request>
-            <Response/>
+            <Response />
         </Flow>
 
         <Flow name="LogRequestAndResponse">
@@ -75,7 +61,7 @@
                     <Request>TransformRequestPayload.xslt</Request>
                 </Step>
             </Request>
-            <Response/>
+            <Response />
         </Flow>
 
         <Flow name="TransformResponse">
@@ -101,3 +87,6 @@
                     </SpikeArrestPolicy>
                 </Step>
             </Request>
+        </Flow>
+    </Flows>
+</MediationPolicy>

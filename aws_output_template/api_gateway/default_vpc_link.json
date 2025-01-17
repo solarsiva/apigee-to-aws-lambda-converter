@@ -1,0 +1,9 @@
+{
+  "vpcLink": {
+    "name": "ConvertedVPCLink",
+    "targets": [
+      "https://api.example.com/v1",
+      "https://api.backup.com/v1"
+    ]
+  }
+}

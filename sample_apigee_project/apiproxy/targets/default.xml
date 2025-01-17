@@ -1,7 +1,8 @@
-```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-This is a complex Apigee target-endpoint policy that includes various configurations and settings that may be used in a production environment. It follows Apigee best practices and includes detailed comments explaining each section.
+This is a complex Apigee target-endpoint policy that includes various configurations and settings
+that may be used in a production environment. It follows Apigee best practices and includes detailed
+comments explaining each section.
 -->
 <TargetEndpoint name="ComplexTargetEndpoint">
     <!-- Load Balancing Configuration -->
@@ -71,7 +72,7 @@ This is a complex Apigee target-endpoint policy that includes various configurat
             <!-- Remove a response header -->
             <Response>
                 <Headers>
-                    <Header name="X-Backend-Server" status="remove"/>
+                    <Header name="X-Backend-Server" status="remove" />
                 </Headers>
             </Response>
         </Flow>
@@ -100,4 +101,10 @@ This is a complex Apigee target-endpoint policy that includes various configurat
         <Step>
             <Name>LogError</Name>
         </Step>
-        <!-- Return a generic
+        <!-- Return a generic -->
+        <AlwaysEnforceDefaultFaultResponse>
+            <StatusCode>400</StatusCode>
+            <ResponseBody>An error occurred processing your request.</ResponseBody>
+        </AlwaysEnforceDefaultFaultResponse>
+    </DefaultFaultRule>
+</TargetEndpoint>

@@ -1,10 +1,11 @@
-```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-    This is a complex Apigee security policy that follows best practices for securing APIs in production environments.
-    It includes various security measures such as OAuth 2.0 protection, IP address filtering, rate limiting, threat protection, and more.
+    This is a complex Apigee security policy that follows best practices for securing APIs in
+production environments.
+    It includes various security measures such as OAuth 2.0 protection, IP address filtering, rate
+limiting, threat protection, and more.
 -->
-<policies xmlns="http://apigee.com/VerifyAPIKey">
+<SecurityPolicy name="ComplexSecurity">
     <policy name="Verify API Key" revision="1">
         <!--
             This policy verifies the API key passed in the request header or query parameter.
@@ -47,7 +48,8 @@
 
     <policy name="Rate Limiting" revision="1">
         <!--
-            This policy limits the rate of incoming requests to protect against abuse and denial of service attacks.
+            This policy limits the rate of incoming requests to protect against abuse and denial of service
+        attacks.
             It can be configured with different rate limits based on the client, API, or resource.
         -->
         <quota>
@@ -62,7 +64,8 @@
 
     <policy name="Threat Protection" revision="1">
         <!--
-            This policy provides protection against various threats such as SQL injection, cross-site scripting (XSS), and other malicious attacks.
+            This policy provides protection against various threats such as SQL injection, cross-site scripting
+        (XSS), and other malicious attacks.
             It inspects and sanitizes incoming requests to prevent exploits.
         -->
         <threat-protection>
@@ -81,7 +84,8 @@
 
     <policy name="Content Validation" revision="1">
         <!--
-            This policy validates the content of incoming requests to ensure they conform to expected formats and schemas.
+            This policy validates the content of incoming requests to ensure they conform to expected formats
+        and schemas.
             It can validate XML, JSON, or other data formats based on predefined schemas or rules.
         -->
         <content-validation>
@@ -95,5 +99,14 @@
 
     <policy name="CORS" revision="1">
         <!--
-            This policy enables Cross-Origin Resource Sharing (CORS) for the API, allowing it to be accessed from different domains.
-            It can be configured with allowed origins, methods, headers, and other
+            This policy enables Cross-Origin Resource Sharing (CORS) for the API, allowing it to be accessed
+        from different domains.
+            It can be configured with allowed origins, methods, headers, and other settings.
+        -->
+        <cors>
+            <allowed-origins>*</allowed-origins>
+            <allowed-methods>GET, POST, PUT, DELETE</allowed-methods>
+            <allowed-headers>Content-Type, Authorization</allowed-headers>
+        </cors>
+    </policy>
+</SecurityPolicy>
